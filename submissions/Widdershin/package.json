@@ -20,7 +20,8 @@
   "dependencies": {
     "@cycle/core": "^3.1.0",
     "@cycle/dom": "^5.3.1",
-    "cycle-time-travel": "^0.1.2"
+    "cycle-time-travel": "^0.1.2",
+    "rx-dom": "^6.0.0"
   },
   "devDependencies": {
     "babelify": "^6.3.0",
