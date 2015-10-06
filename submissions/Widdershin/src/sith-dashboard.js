@@ -28,14 +28,25 @@ export default function sithDashboard ({DOM, HTTP}) {
     .mergeAll()
     .map(response => JSON.parse(response.text))
     .scan((sithLords, sith) => {
-      return sithLords.concat([sith]);
+      let newSithLords = sithLords.filter(sithLord => !!sithLord).concat([sith]);
+
+      if (newSithLords.length === 5) {
+        return newSithLords;
+      }
+
+      while (newSithLords.length < 5) {
+        newSithLords.push(null);
+      }
+
+      return newSithLords;
     }, [])
     .map(sithLords => Array.from(sithLords))
-    .startWith([{}, {}, {}, {}, {}]);
+    .startWith([null, null, null, null, null]);
 
   const sithRequest$ = sith$
+    .map(sithLords => sithLords.filter(sithLord => !!sithLord))
     .map(last)
-    .filter(sithLord => sithLord !== undefined)
+    .filter(sithLord => !!sithLord)
     .filter(sithLord => 'apprentice' in sithLord && !!sithLord.apprentice.id)
     .map(sithLord => sithLord.apprentice.id)
     .startWith(FIRST_SITH_ID)

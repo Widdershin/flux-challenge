@@ -15,7 +15,7 @@ function scrollButtons () {
 }
 
 function sithSlot (sithLord) {
-  if (Object.keys(sithLord).length === 0) {
+  if (sithLord === null) {;
     return h('li.css-slot');
   }
 
