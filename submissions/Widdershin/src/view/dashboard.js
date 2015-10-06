@@ -1,15 +1,27 @@
 import {Rx} from '@cycle/core';
 import {h} from '@cycle/dom';
 
+function last (array) {
+  return array[array.length - 1];
+}
+
 function planetMonitor (planet) {
   return h('h1.css-planet-monitor', `Obi Wan is currently on ${planet.name}`);
 }
 
-function scrollButtons () {
+function scrollButtons (sithLords) {
+  let downButtonExtraClasses = '';
+
+  const actualSithLords = sithLords.filter(sithLord => !!sithLord);
+
+  if (actualSithLords.length !== 5 || !last(actualSithLords).apprentice.id) {
+    downButtonExtraClasses = '.css-button-disabled';
+  }
+
   return (
     h('.css-scroll-buttons', [
       h('button.css-button-up'),
-      h('button.css-button-down')
+      h('button.css-button-down' + downButtonExtraClasses)
     ])
   );
 }
@@ -37,7 +49,7 @@ function sithList (sithLords) {
   return (
     h('section.css-scrollable-list', [
       sithSlots(sithLords),
-      scrollButtons()
+      scrollButtons(sithLords)
     ])
   );
 }
