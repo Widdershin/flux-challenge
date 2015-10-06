@@ -5,6 +5,8 @@ import dashboardView from './view/dashboard';
 
 Rx.DOM = DOM;
 
+Rx.config.longStackSupport = true;
+
 const PLANET_SOCKET_ADDRESS = 'ws://localhost:4000';
 const FIRST_SITH_ID = 3616;
 const SITH_ENDPOINT = 'http://localhost:3000/dark-jedis';
@@ -24,14 +26,17 @@ export default function sithDashboard ({DOM, HTTP}) {
 
   const sith$ = HTTP
     .mergeAll()
-    .do(console.log.bind(console))
     .map(response => JSON.parse(response.text))
-    .scan((sithLords, sith) => sithLords.concat([sith]), [])
-    .startWith([]);
+    .scan((sithLords, sith) => {
+      return sithLords.concat([sith]);
+    }, [])
+    .map(sithLords => Array.from(sithLords))
+    .startWith([{}, {}, {}, {}, {}]);
 
   const sithRequest$ = sith$
     .map(last)
-    .filter(sithLord => sithLord && !!sithLord.apprentice.id)
+    .filter(sithLord => sithLord !== undefined)
+    .filter(sithLord => 'apprentice' in sithLord && !!sithLord.apprentice.id)
     .map(sithLord => sithLord.apprentice.id)
     .startWith(FIRST_SITH_ID)
     .map(fetchSith);

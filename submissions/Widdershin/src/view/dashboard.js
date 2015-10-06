@@ -15,6 +15,10 @@ function scrollButtons () {
 }
 
 function sithSlot (sithLord) {
+  if (Object.keys(sithLord).length === 0) {
+    return h('li.css-slot');
+  }
+
   return (
     h('li.css-slot', [
       h('h3', sithLord.name),
