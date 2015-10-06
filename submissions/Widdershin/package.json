@@ -1,0 +1,32 @@
+{
+  "name": "flux-challenge-cycle-solution-widdershin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "budo index.js --live -- -t babelify | garnish",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Widdershin/flux-challenge"
+  },
+  "author": "Nick Johnstone",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Widdershin/flux-challenge/issues"
+  },
+  "homepage": "https://github.com/Widdershin/flux-challenge",
+  "dependencies": {
+    "@cycle/core": "^3.1.0",
+    "@cycle/dom": "^5.3.1",
+    "cycle-time-travel": "^0.1.2"
+  },
+  "devDependencies": {
+    "babelify": "^6.3.0",
+    "browserify": "^11.2.0",
+    "budo": "^5.1.1",
+    "garnish": "^3.2.1",
+    "watchify": "^3.4.0"
+  }
+}
