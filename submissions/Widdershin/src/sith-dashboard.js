@@ -14,8 +14,10 @@ export default function sithDashboard ({DOM}) {
   return {
     DOM: planet$.map(planet => {
       return (
-        h('.sithLords', planet.name)
-      )
+        h('.css-root', [
+          h('h1.css-planet-monitor', `Obi Wan is currently on ${planet.name}`)
+        ])
+      );
     })
   };
 }
