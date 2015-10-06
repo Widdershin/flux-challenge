@@ -28,21 +28,21 @@ function sithSlots (sithLords) {
   );
 }
 
-function sithList () {
+function sithList (sithLords) {
   return (
     h('section.css-scrollable-list', [
-      sithSlots([]),
+      sithSlots(sithLords),
       scrollButtons()
     ])
   );
 }
 
-export default function dashboardView (planet$) {
-  return planet$.map(planet =>
+export default function dashboardView (planet$, sith$) {
+  return planet$.withLatestFrom(sith$).map(([planet, sithLords]) =>
     h('.css-root', [
       planetMonitor(planet),
 
-      sithList()
+      sithList(sithLords)
     ])
   );
 }
