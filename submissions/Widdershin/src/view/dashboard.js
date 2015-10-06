@@ -1,3 +1,4 @@
+import {Rx} from '@cycle/core';
 import {h} from '@cycle/dom';
 
 function planetMonitor (planet) {
@@ -38,7 +39,7 @@ function sithList (sithLords) {
 }
 
 export default function dashboardView (planet$, sith$) {
-  return planet$.withLatestFrom(sith$).map(([planet, sithLords]) =>
+  return Rx.Observable.combineLatest(planet$, sith$, (planet, sithLords) =>
     h('.css-root', [
       planetMonitor(planet),
 
