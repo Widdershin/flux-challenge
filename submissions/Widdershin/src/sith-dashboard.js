@@ -13,8 +13,8 @@ function planetMonitor (planet) {
 function scrollButtons () {
   return (
     h('.css-scroll-buttons', [
-      h('.css-button-up'),
-      h('.css-button-down')
+      h('button.css-button-up'),
+      h('button.css-button-down')
     ])
   );
 }
