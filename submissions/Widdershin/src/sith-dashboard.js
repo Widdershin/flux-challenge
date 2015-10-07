@@ -71,7 +71,7 @@ export default function sithDashboard ({DOM, HTTP}) {
     }
   }
 
-  const sithRequest$ = Rx.Observable.combineLatest(sithRange$, sith$,
+  const sithRequest$ = Rx.Observable.combineLatest(sithRange$, sith$, scroll$,
       (range, sithLords) => nextLookupId(range, sithLords)
     )
     .filter(request => !!request)
