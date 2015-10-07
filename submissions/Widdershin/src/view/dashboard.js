@@ -14,7 +14,7 @@ function scrollButtons (sithLords) {
 
   const actualSithLords = sithLords.filter(sithLord => !!sithLord);
 
-  if (actualSithLords.length !== 5 || !last(actualSithLords).apprentice.id) {
+  if (actualSithLords.length < 5 || !last(actualSithLords).apprentice.id) {;
     downButtonExtraClasses = '.css-button-disabled';
   }
 

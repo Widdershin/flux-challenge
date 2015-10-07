@@ -80,18 +80,15 @@ export default function sithDashboard ({DOM, HTTP}) {
     .startWith({index: 0, id: FIRST_SITH_ID, url: fetchSith(FIRST_SITH_ID)});
 
   const timeTravel = TimeTravel(DOM, [
-    {stream: HTTP.mergeAll(), label: 'HTTP'},
     {stream: sithRange$, label: 'sithRange$'},
-    {stream: sithToDisplay$, label: 'sithToDisplay$', feature: true},
     {stream: sith$, label: 'sith$', feature: false},
-    {stream: planet$, label: 'planet$'},
     {stream: scroll$, label: 'scroll$'},
     {stream: sithRequest$, label: 'sithRequest$'}
   ]);
 
   return {
     DOM: Rx.Observable.combineLatest(
-      dashboardView(timeTravel.timeTravel.planet$, timeTravel.timeTravel.sithToDisplay$),
+      dashboardView(planet$, sithToDisplay$),
       timeTravel.DOM,
       function (dashboard, bar) { return h('.app-container', [dashboard, bar]); }
     ),
