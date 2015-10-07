@@ -1,7 +1,8 @@
 import {Rx} from '@cycle/core';
-import {h} from '@cycle/dom';;
+import {h} from '@cycle/dom';
 import {DOM} from 'rx-dom';
 import TimeTravel from 'cycle-time-travel';
+import _ from 'lodash';
 
 import dashboardView from './view/dashboard';
 
@@ -26,42 +27,71 @@ export default function sithDashboard ({DOM, HTTP}) {
     .map(message => JSON.parse(message.data))
     .startWith({id: 0, name: 'Earth'});
 
+  const upButtonClick$ = DOM.select('.css-button-up').events('click');
+  const downButtonClick$ = DOM.select('.css-button-down').events('click');
+
+  const scroll$ = Rx.Observable.merge(
+    upButtonClick$.map(_ => -1),
+    downButtonClick$.map(_ => +1)
+  ).scan((total, change) => total + change)
+   .startWith(0);
+
+  const sithRange$ = scroll$.map(currentScroll => _.range(currentScroll, currentScroll + 5));
+
   const sith$ = HTTP
-    .mergeAll()
-    .map(response => JSON.parse(response.text))
-    .scan((sithLords, sith) => {
-      let newSithLords = sithLords.filter(sithLord => !!sithLord).concat([sith]);
+    .flatMap(
+      response$ => response$,
+      (response$, response) => ({response, request: response$.request})
+    )
+    .scan((sithLords, {response, request}) => {
+      let sith = JSON.parse(response.text);
 
-      if (newSithLords.length === 5) {
-        return newSithLords;
-      }
+      sithLords[request.index] = sith;
 
-      while (newSithLords.length < 5) {
-        newSithLords.push(null);
-      }
+      return sithLords;
+    }, {})
+    .startWith({});
 
-      return newSithLords;
-    }, [])
-    .map(sithLords => Array.from(sithLords))
-    .startWith([null, null, null, null, null]);
+  const sithToDisplay$ = Rx.Observable.combineLatest(sith$, sithRange$, (sith, sithRange) => {
+    return sithRange.map(index => sith[index] || null);
+  });
 
-  const sithRequest$ = sith$
-    .map(sithLords => sithLords.filter(sithLord => !!sithLord))
-    .map(last)
-    .filter(sithLord => !!sithLord)
-    .filter(sithLord => 'apprentice' in sithLord && !!sithLord.apprentice.id)
-    .map(sithLord => sithLord.apprentice.id)
-    .startWith(FIRST_SITH_ID)
-    .map(fetchSith);
+  function nextLookupId (indexRange, sithLords) {
+    const nextLookupIndex = _.first(indexRange.filter(index => sithLords[index] === null || sithLords[index] === undefined));
+
+    const master = sithLords[nextLookupIndex - 1];
+    const apprentice = sithLords[nextLookupIndex + 1];
+
+    if (master) {
+      return {index: nextLookupIndex, id: master.apprentice.id};
+    }
+
+    if (apprentice) {
+      return {index: nextLookupIndex, id: apprentice.master.id};
+    }
+  }
+
+  const sithRequest$ = Rx.Observable.combineLatest(sithRange$, sith$,
+      (range, sithLords) => nextLookupId(range, sithLords)
+    )
+    .filter(request => !!request)
+    .filter(request => !!request.id)
+    .map(request => Object.assign({}, {url: fetchSith(request.id)}, request))
+    .startWith({index: 0, id: FIRST_SITH_ID, url: fetchSith(FIRST_SITH_ID)});
 
   const timeTravel = TimeTravel(DOM, [
-    {stream: sith$, label: 'sith$', feature: true},
-    {stream: planet$, label: 'planet$'}
+    {stream: HTTP.mergeAll(), label: 'HTTP'},
+    {stream: sithRange$, label: 'sithRange$'},
+    {stream: sithToDisplay$, label: 'sithToDisplay$', feature: true},
+    {stream: sith$, label: 'sith$', feature: false},
+    {stream: planet$, label: 'planet$'},
+    {stream: scroll$, label: 'scroll$'},
+    {stream: sithRequest$, label: 'sithRequest$'}
   ]);
 
   return {
     DOM: Rx.Observable.combineLatest(
-      dashboardView(planet$, timeTravel.timeTravel.sith$),
+      dashboardView(timeTravel.timeTravel.planet$, timeTravel.timeTravel.sithToDisplay$),
       timeTravel.DOM,
       function (dashboard, bar) { return h('.app-container', [dashboard, bar]); }
     ),
