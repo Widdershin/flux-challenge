@@ -1,5 +1,7 @@
 import {Rx} from '@cycle/core';
+import {h} from '@cycle/dom';;
 import {DOM} from 'rx-dom';
+import TimeTravel from 'cycle-time-travel';
 
 import dashboardView from './view/dashboard';
 
@@ -52,8 +54,17 @@ export default function sithDashboard ({DOM, HTTP}) {
     .startWith(FIRST_SITH_ID)
     .map(fetchSith);
 
+  const timeTravel = TimeTravel(DOM, [
+    {stream: sith$, label: 'sith$', feature: true},
+    {stream: planet$, label: 'planet$'}
+  ]);
+
   return {
-    DOM: dashboardView(planet$, sith$),
+    DOM: Rx.Observable.combineLatest(
+      dashboardView(planet$, timeTravel.timeTravel.sith$),
+      timeTravel.DOM,
+      function (dashboard, bar) { return h('.app-container', [dashboard, bar]); }
+    ),
     HTTP: sithRequest$
   };
 }
